@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -59,8 +60,25 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Configurar políticas de autorização
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireAssertion(context =>
+            context.User.FindFirst("UserType")?.Value == "Admin"));
+
+    options.AddPolicy("EmployeeAdminOnly", policy =>
+        policy.RequireAssertion(context =>
+        {
+            var userType = context.User.FindFirst("UserType")?.Value;
+            return userType == "Admin" || userType == "Employee";
+        }));
+});
+
 // Registrar serviços de aplicação
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 var app = builder.Build();
 
@@ -68,11 +86,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    // Criar database ao iniciar em dev
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    // Criar database e seed ao iniciar em dev
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<BookingContext>();
         db.Database.EnsureCreated();
+
+        var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        await initializer.InitializeAsync();
     }
 }
 
