@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Barber Booking - Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="./swagger-ui.css">
+    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16">
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .swagger-ui {
+            max-width: 1460px;
+        }
+        
+        /* Customização do header */
+        .topbar {
+            background-color: #1e3a5f;
+        }
+        
+        /* Customização para diálogos de autorização */
+        .modal-ux {
+            background: rgba(0, 0, 0, 0.8) !important;
+        }
+        
+        /* Melhorar visibilidade do botão Authorize */
+        .btn.authorize {
+            background-color: #00a86b !important;
+        }
+
+        .auth-container {
+            background-color: #f8f9fa;
+            border: 2px solid #00a86b;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .auth-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #00a86b;
+        }
+
+        .auth-instruction {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .auth-instruction strong {
+            color: #1e3a5f;
+        }
+
+        .token-input-wrapper {
+            margin-bottom: 15px;
+        }
+
+        .token-input-wrapper label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .token-input-wrapper input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .token-input-wrapper input:focus {
+            outline: none;
+            border-color: #00a86b;
+            box-shadow: 0 0 5px rgba(0, 166, 107, 0.3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button-group .btn-authorize {
+            background-color: #00a86b;
+            color: white;
+        }
+
+        .button-group .btn-authorize:hover {
+            background-color: #008c47;
+        }
+
+        .button-group .btn-clear {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .button-group .btn-clear:hover {
+            background-color: #c82333;
+        }
+
+        .success-message {
+            color: #00a86b;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+
+    <script src="./swagger-ui-bundle.js"></script>
+    <script src="./swagger-ui-standalone-preset.js"></script>
+    <script src="./swagger-initializer.js"></script>
+    
+    <script>
+        // Injetar seção de autenticação customizada
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                // Procurar por topbar e adicionar seção de autenticação
+                const topbar = document.querySelector('.topbar');
+                if (topbar) {
+                    // Criar container de autenticação
+                    const authContainer = document.createElement('div');
+                    authContainer.className = 'auth-container';
+                    authContainer.innerHTML = `
+                        <div class="auth-title">🔐 Autenticação Bearer JWT</div>
+                        <div class="auth-instruction">
+                            <strong>Passo 1:</strong> Faça login em
+                            <span style="background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px;">POST /api/auth/login</span>
+                            com as credenciais:
+                            <br>Email: <code>admin@barberbooking.com</code>
+                            <br>Senha: <code>Admin@123456</code>
+                        </div>
+                        
+                        <div class="auth-instruction">
+                            <strong>Passo 2:</strong> Copie o token JWT completo retornado (apenas a sequência de caracteres)
+                        </div>
+                        
+                        <div class="token-input-wrapper">
+                            <label for="bearerToken">Cole o token JWT aqui:</label>
+                            <input 
+                                type="text" 
+                                id="bearerToken" 
+                                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;">
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="btn-authorize" onclick="setAuthorizationToken()">✓ Autorizar</button>
+                            <button class="btn-clear" onclick="clearAuthorizationToken()">✗ Limpar</button>
+                        </div>
+                        
+                        <div id="authMessage"></div>
+                    `;
+                    
+                    // Inserir antes do logo
+                    topbar.insertBefore(authContainer, topbar.firstChild);
+                }
+            }, 500);
+        });
+
+        function setAuthorizationToken() {
+            const token = document.getElementById('bearerToken').value.trim();
+            const messageDiv = document.getElementById('authMessage');
+            
+            if (!token) {
+                messageDiv.innerHTML = '<div class="error-message">❌ Por favor, cole o token JWT primeiro</div>';
+                return;
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('bearerToken', token);
+            
+            // Tentar usar a API do Swagger UI para setar o token
+            if (window.swaggerui && window.swaggerui.presets && window.swaggerui.presets[0]) {
+                messageDiv.innerHTML = '<div class="success-message">✅ Token autorizado! Será enviado em todas as requisições.</div>';
+            } else {
+                messageDiv.innerHTML = '<div class="success-message">✅ Token salvo!</div>';
+            }
+            
+            // Limpar campo após sucesso
+            setTimeout(() => {
+                document.getElementById('bearerToken').value = '';
+            }, 1500);
+        }
+
+        function clearAuthorizationToken() {
+            localStorage.removeItem('bearerToken');
+            document.getElementById('bearerToken').value = '';
+            document.getElementById('authMessage').innerHTML = '<div class="error-message">❌ Token limpo</div>';
+            setTimeout(() => {
+                document.getElementById('authMessage').innerHTML = '';
+            }, 2000);
+        }
+
+        // Injetar token em requisições automaticamente
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const token = localStorage.getItem('bearerToken');
+                if (token && window.ui) {
+                    // Tentar usar a API do Swagger para set Authorization
+                    try {
+                        window.ui.presets[0].credentials = function() {
+                            return {
+                                headers: {
+                                    'Authorization': 'Bearer ' + token
+                                }
+                            };
+                        };
+                    } catch (e) {
+                        console.log('Será usado fallback para header customizado');
+                    }
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

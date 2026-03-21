@@ -6,13 +6,17 @@ using System.Text;
 using BarberBooking.Data;
 using BarberBooking.Data.Services;
 using BarberBooking.Core.Models;
+using BarberBooking.Api.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSwaggerAuthentication();
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -88,7 +92,14 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.DocumentTitle = "API Barber Booking - Swagger UI";
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "API - v1");
+        
+        // Injetar script customizado para facilitar o Bearer token
+        options.InjectJavascript("/swagger-token-helper.js");
+    });
 
     // Criar database e seed ao iniciar em dev
     using (var scope = app.Services.CreateScope())

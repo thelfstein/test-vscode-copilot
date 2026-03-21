@@ -16,8 +16,9 @@ namespace BarberBooking.Tests
 
         public AuthServiceTests()
         {
-            _userManagerMock = new Mock<UserManager<ApplicationUser>>(
-                new Mock<IUserStore<ApplicationUser>>().Object, null, null, null, null, null, null, null, null);
+            var userStore = new Mock<IUserStore<ApplicationUser>>().Object;
+            _userManagerMock = new Mock<UserManager<ApplicationUser>>(userStore,
+                null, null, null, null, null, null, null, null);
             
             _configurationMock = new Mock<IConfiguration>();
             _configurationMock.Setup(x => x["Jwt:Secret"]).Returns("supersecretkeysupersecretkey123456789!@#$%^&*()");
@@ -95,7 +96,7 @@ namespace BarberBooking.Tests
             };
 
             _userManagerMock.Setup(x => x.FindByEmailAsync(request.Email))
-                .ReturnsAsync((ApplicationUser)null);
+                .ReturnsAsync(null as ApplicationUser);
 
             _userManagerMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), request.Password))
                 .ReturnsAsync(IdentityResult.Success);
