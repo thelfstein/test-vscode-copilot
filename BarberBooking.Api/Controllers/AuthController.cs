@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BarberBooking.Core.DTOs;
-using BarberBooking.Core.Services;
+using BarberBooking.Data.Services;
 
 namespace BarberBooking.Api.Controllers
 {

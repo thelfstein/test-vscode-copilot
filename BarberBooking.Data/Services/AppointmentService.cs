@@ -1,7 +1,8 @@
-/* Services moved to BarberBooking.Data.Services */
+using Microsoft.EntityFrameworkCore;
+using BarberBooking.Core.DTOs;
+using BarberBooking.Core.Models;
 
-
-namespace BarberBooking.Core.Services
+namespace BarberBooking.Data.Services
 {
     public interface IAppointmentService
     {

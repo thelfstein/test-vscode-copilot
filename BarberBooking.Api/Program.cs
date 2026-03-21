@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using BarberBooking.Data;
+using BarberBooking.Data.Services;
 using BarberBooking.Core.Models;
-using BarberBooking.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

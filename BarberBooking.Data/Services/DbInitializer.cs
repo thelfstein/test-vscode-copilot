@@ -1,7 +1,7 @@
-/* Services moved to BarberBooking.Data.Services */
+using Microsoft.AspNetCore.Identity;
+using BarberBooking.Core.Models;
 
-
-namespace BarberBooking.Core.Services
+namespace BarberBooking.Data.Services
 {
     public interface IDbInitializer
     {
