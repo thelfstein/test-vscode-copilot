@@ -1,0 +1,19 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.tmp
+*.temp
+.vs/
+.vscode/settings.json  # se não quiser compartilhar configs
+
+# Banco de dados
+*.mdf
+*.ldf
+
+# Outros
+.DS_Store
+Thumbs.db
